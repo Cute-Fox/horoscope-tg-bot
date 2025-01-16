@@ -17,7 +17,7 @@ pip install -r requirements.txt
 3. 📝 **Создайте файл** `config.py` в папке вашего проекта
 4. 🔑 Добавьте в `config.py` **API-токен** вашего Telegram-ботавашего телеграма в следующем формате
 ```python
-api_token = '7763050590:AAGlapJMGAgLfBuSdLcLfznjNCka1a06b74'
+api_token = 'your-api-token-from-tg-father-bot'
 ```
 5. ▶️ **Запустите бота**
 ```bash
