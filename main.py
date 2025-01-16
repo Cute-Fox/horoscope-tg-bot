@@ -3,37 +3,9 @@ import random
 import config
 from bs4 import BeautifulSoup
 import requests
+import magic
 
 bot = telebot.TeleBot(config.api_token)
-
-# Функция для получения гороскопа
-def get_horoscope(sign: str, period: str = "today") -> str:
-    if period == 'today':
-        url = f"https://horoscopes.rambler.ru/{sign}/"
-    elif period == 'yesterday':
-        url = f"https://horoscopes.rambler.ru/{sign}/yesterday/"
-    elif period == 'tomorrow':
-        url = f"https://horoscopes.rambler.ru/{sign}/tomorrow/"
-    elif period == 'weekly':
-        url = f"https://horoscopes.rambler.ru/{sign}/weekly/"
-    elif period == 'monthly':
-        url = f"https://horoscopes.rambler.ru/{sign}/monthly/"
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-    }
-
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        return f"Ошибка: Не удалось получить данные для {sign}."
-
-    soup = BeautifulSoup(response.text, "html.parser")
-    horoscope = soup.find("p", class_="_5yHoW AjIPq")
-
-    if horoscope:
-        return horoscope.text.strip()
-    else:
-        return "Гороскоп не найден."
 
 # Данные для цвета дня и совета
 colors = {
@@ -108,9 +80,10 @@ def zodiac_info(message):
     else:
         # Для "Цвет дня" и "Совет дня" сразу выводим данные, база есть
         if selected_category == 'Цвет дня 🌈':
-            response = f"Ваш цвет дня: {random.choice(colors[zodiac])}"
+            color, number = magic.get_day_color_and_number(zodiac)
+            response = f"Ваш цвет дня: {color}\nВаше число дня: {number}"
         elif selected_category == 'Совет дня ✨':
-            response = advices[zodiac]
+            response = magic.get_random_wish_from_json()
 
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(telebot.types.KeyboardButton("Вернуться в меню"))
@@ -121,7 +94,7 @@ def handle_query(call):
     zodiac_eng = call.data.split('_')[0]
     period = call.data.split('_')[1]
     
-    horoscope = get_horoscope(zodiac_eng, period)
+    horoscope = magic.get_horoscope(zodiac_eng, period)
     markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(telebot.types.KeyboardButton("Вернуться в меню"))
     bot.send_message(call.message.chat.id, horoscope, reply_markup=markup)
